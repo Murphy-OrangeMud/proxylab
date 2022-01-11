@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "csapp.h"
 
 /* Recommended max cache and object sizes */
@@ -90,6 +89,12 @@ void start_proxy(int connfd) {
         Close(clientfd);
 }
 
+void *wrapper(void *connfd_p) {
+    int connfd = *(int *)connfd_p;
+    start_proxy(connfd);
+    Close(connfd);
+}
+
 int main(int argc, char *argv[])
 {
     int listenfd, connfd;
@@ -108,9 +113,10 @@ int main(int argc, char *argv[])
         connfd = Accept(listenfd, (SA* )&clientaddr, &clientlen);
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE, port, MAXLINE, 0);
         printf("Accepted connection from (%s, %s)\n", hostname, port);
-        start_proxy(connfd);
-
-        Close(connfd);
+        
+        pthread_t phd;
+        pthread_create(&phd, NULL, wrapper, &connfd);
+        pthread_detach(phd);
     }
 
     printf("%s", user_agent_hdr);
