@@ -13,7 +13,7 @@ static char cache[MAX_CACHE_SIZE];
 static int cache_index;
 
 /* Data structures for LRU */
-#define MOD 11
+#define MOD 3
 
 typedef struct node {
     struct node *prev, *next;
@@ -22,7 +22,7 @@ typedef struct node {
     char *buf;
 } node;
 typedef struct obj {
-    char *name;
+    char name[MAXLINE];
     struct node *cache;
     struct obj *next;
 } obj;
@@ -149,13 +149,13 @@ void start_proxy(int connfd) {
             if (cur->next == NULL) {
                 cur->next = (struct obj *)malloc(sizeof(obj));
                 cur = cur->next;
-                cur->name = uri;
+                strcpy(cur->name, uri);
                 cur->next = NULL;
             }
         } else {
             hashmap[hashnum] = (struct obj *)malloc(sizeof(obj));
             cur = hashmap[hashnum];
-            cur->name = uri;
+            strcpy(cur->name, uri);
             cur->next = NULL;
         }
 
