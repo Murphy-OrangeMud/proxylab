@@ -51,18 +51,24 @@ void clienterror(int fd, char *cause, char *errnum, char *shortmsg, char *longms
 
 void parse_url(char *url, char *host, char *port, char *uri) {
     int i, j;
-    for (i = 7, j = 0; url[i] != ':'; i++, j++) {
+    for (i = 7, j = 0; url[i] != '/' && url[i] != ':'; i++, j++) {
         host[j] = url[i];
     }
     host[j] = 0; i++;
-    for (j = 0; url[i] != '/'; i++, j++) {
+    for (j = 0; url[i] && url[i] != '/'; i++, j++) {
         port[j] = url[i];
     }
     port[j] = 0;
+    if (j == 0) {
+        port[0] = '8'; port[1] = '0'; port[2] = 0;
+    }
     for (j = 0; url[i]; i++, j++) {
         uri[j] = url[i];
     }
     uri[j] = 0;
+    if (j == 0) {
+        uri[0] = '/', uri[1] = 0;
+    }
 }
 
 void start_proxy(int connfd) {
